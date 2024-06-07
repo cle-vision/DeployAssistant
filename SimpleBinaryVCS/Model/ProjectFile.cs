@@ -42,10 +42,10 @@ namespace SimpleBinaryVCS.Model
             this.DeployedProjectVersion = DeployedProjectVersion;
             this.UpdatedTime = UpdatedTime;
             this.DataState = DataState;
-            this.DataName = dataName;
-            this.DataSrcPath = dataSrcPath;
-            this.DataRelPath = dataRelPath;
-            this.DataHash = dataHash;
+            DataName = dataName;
+            DataSrcPath = dataSrcPath;
+            DataRelPath = dataRelPath;
+            DataHash = dataHash;
             this.IsDstFile = IsDstFile;
         }
         #region Overloaded Constructors
@@ -54,47 +54,47 @@ namespace SimpleBinaryVCS.Model
         /// </summary>
         public ProjectFile(long fileSize, string? fileVersion, string fileName, string fileSrcPath, string fileRelPath, DataState changedState)
         {
-            this.DataSize = fileSize;
-            this.BuildVersion = fileVersion ?? "";
-            this.DataName = fileName;
-            this.DataSrcPath = fileSrcPath;
-            this.DataRelPath = fileRelPath;
-            this.DataHash = "";
-            this.DeployedProjectVersion = "";
-            this.UpdatedTime = DateTime.Now;
-            this.DataState = changedState;
+            DataSize = fileSize;
+            BuildVersion = fileVersion ?? "";
+            DataName = fileName;
+            DataSrcPath = fileSrcPath;
+            DataRelPath = fileRelPath;
+            DataHash = "";
+            DeployedProjectVersion = "";
+            UpdatedTime = DateTime.Now;
+            DataState = changedState;
         }
         /// <summary>
         /// For PreStagedProjectFile Data Type = File 
         /// </summary>
         public ProjectFile(long DataSize, string? BuildVersion, string DataName, string DataSrcPath, string DataRelPath)
         {
-            this.DataType = ProjectDataType.File;
+            DataType = ProjectDataType.File;
             this.DataSize = DataSize;
             this.BuildVersion = BuildVersion ?? "";
-            this.DeployedProjectVersion = "";
-            this.UpdatedTime = DateTime.MinValue;
-            this.DataState = DataState.PreStaged;
+            DeployedProjectVersion = "";
+            UpdatedTime = DateTime.MinValue;
+            DataState = DataState.PreStaged;
             this.DataName = DataName;
             this.DataSrcPath = DataSrcPath;
             this.DataRelPath= DataRelPath;
-            this.DataHash = "";
+            DataHash = "";
         }
         /// <summary>
         /// For PreStagedProjectFile Data Type = Directory 
         /// </summary>
         public ProjectFile(string DataName, string DataSrcPath, string DataRelPath)
         {
-            this.DataType = ProjectDataType.Directory;
-            this.DataSize = 0;
-            this.BuildVersion = "";
-            this.DeployedProjectVersion = "";
-            this.UpdatedTime = DateTime.MinValue;
-            this.DataState = DataState.PreStaged;
+            DataType = ProjectDataType.Directory;
+            DataSize = 0;
+            BuildVersion = "";
+            DeployedProjectVersion = "";
+            UpdatedTime = DateTime.MinValue;
+            DataState = DataState.PreStaged;
             this.DataName = DataName;
             this.DataSrcPath = DataSrcPath;
             this.DataRelPath = DataRelPath;
-            this.DataHash = "";
+            DataHash = "";
         }
         /// <summary>
         /// Deep Copy of ProjectFile
@@ -115,42 +115,42 @@ namespace SimpleBinaryVCS.Model
         }
         public ProjectFile(ProjectFile updatedData, string deployedProjectVersion, string currentProjectPath)
         {
-            this.DataType = updatedData.DataType;
-            this.DataSize = updatedData.DataSize;
-            this.BuildVersion = updatedData.BuildVersion;
-            this.DeployedProjectVersion = deployedProjectVersion;
-            this.UpdatedTime = DateTime.Now;
-            this.DataState = updatedData.DataState;
-            this.DataName = updatedData.DataName;
-            this.DataSrcPath = currentProjectPath;
-            this.DataRelPath = updatedData.DataRelPath;
-            this.DataHash = updatedData.DataHash;
+            DataType = updatedData.DataType;
+            DataSize = updatedData.DataSize;
+            BuildVersion = updatedData.BuildVersion;
+            DeployedProjectVersion = deployedProjectVersion;
+            UpdatedTime = DateTime.Now;
+            DataState = updatedData.DataState;
+            DataName = updatedData.DataName;
+            DataSrcPath = currentProjectPath;
+            DataRelPath = updatedData.DataRelPath;
+            DataHash = updatedData.DataHash;
         }
         public ProjectFile(ProjectFile srcData, DataState state)
         {
-            this.DataType = srcData.DataType;
-            this.DataSize = srcData.DataSize;
-            this.BuildVersion = srcData.BuildVersion;
-            this.DeployedProjectVersion = srcData.DeployedProjectVersion;
-            this.UpdatedTime = DateTime.Now;
-            this.DataState = state;
-            this.DataName = srcData.DataName;
-            this.DataSrcPath = srcData.DataSrcPath;
-            this.DataRelPath = srcData.DataRelPath;
-            this.DataHash = srcData.DataHash;
+            DataType = srcData.DataType;
+            DataSize = srcData.DataSize;
+            BuildVersion = srcData.BuildVersion;
+            DeployedProjectVersion = srcData.DeployedProjectVersion;
+            UpdatedTime = DateTime.Now;
+            DataState = state;
+            DataName = srcData.DataName;
+            DataSrcPath = srcData.DataSrcPath;
+            DataRelPath = srcData.DataRelPath;
+            DataHash = srcData.DataHash;
         }
         public ProjectFile(ProjectFile srcData, DataState DataState, string dataSrcPath)
         {
-            this.DataType = srcData.DataType;
-            this.DataSize = srcData.DataSize;
-            this.BuildVersion = srcData.BuildVersion;
-            this.DeployedProjectVersion = srcData.DeployedProjectVersion;
-            this.UpdatedTime = DateTime.Now;
+            DataType = srcData.DataType;
+            DataSize = srcData.DataSize;
+            BuildVersion = srcData.BuildVersion;
+            DeployedProjectVersion = srcData.DeployedProjectVersion;
+            UpdatedTime = DateTime.Now;
             this.DataState = DataState;
-            this.DataName = srcData.DataName;
-            this.DataSrcPath = dataSrcPath;
-            this.DataRelPath = srcData.DataRelPath;
-            this.DataHash = srcData.DataHash;
+            DataName = srcData.DataName;
+            DataSrcPath = dataSrcPath;
+            DataRelPath = srcData.DataRelPath;
+            DataHash = srcData.DataHash;
         }
         public ProjectFile(string fileSrcPath, string fileRelPath, string? fileHash, DataState DataState, ProjectDataType dataType)
         {
@@ -160,22 +160,22 @@ namespace SimpleBinaryVCS.Model
                 if (dataType == ProjectDataType.File)
                 {
                     var fileInfo = FileVersionInfo.GetVersionInfo(fileFullPath);
-                    this.DataSize = new FileInfo(fileFullPath).Length;
-                    this.BuildVersion = fileInfo.FileVersion ?? "";
+                    DataSize = new FileInfo(fileFullPath).Length;
+                    BuildVersion = fileInfo.FileVersion ?? "";
                 }
                 else
                 {
-                    this.DataSize = 0;
-                    this.BuildVersion = "";
+                    DataSize = 0;
+                    BuildVersion = "";
                 }
-                this.DeployedProjectVersion = "";
-                this.DataSrcPath = fileSrcPath;
-                this.DataName = Path.GetFileName(fileFullPath);
-                this.DataRelPath = fileRelPath;
-                this.DataHash = fileHash ?? "";
-                this.UpdatedTime = DateTime.Now;
+                DeployedProjectVersion = "";
+                DataSrcPath = fileSrcPath;
+                DataName = Path.GetFileName(fileFullPath);
+                DataRelPath = fileRelPath;
+                DataHash = fileHash ?? "";
+                UpdatedTime = DateTime.Now;
                 this.DataState = DataState;
-                this.DataType = dataType;
+                DataType = dataType;
             }
             catch (Exception ex)
             {
@@ -198,23 +198,23 @@ namespace SimpleBinaryVCS.Model
         /// </summary>
         public ProjectFile (ProjectDataType dataType)
         {
-            this.DataType = dataType;
-            this.DataSize = 0;
-            this.BuildVersion = "";
-            this.DeployedProjectVersion = "";
-            this.UpdatedTime = DateTime.MaxValue;
-            this.DataState = DataState.None;
-            this.DataName = "";
-            this.DataSrcPath = "";
-            this.DataRelPath = "";
-            this.DataHash = "";
+            DataType = dataType;
+            DataSize = 0;
+            BuildVersion = "";
+            DeployedProjectVersion = "";
+            UpdatedTime = DateTime.MaxValue;
+            DataState = DataState.None;
+            DataName = "";
+            DataSrcPath = "";
+            DataRelPath = "";
+            DataHash = "";
         }
         #endregion
         public int CompareTo(ProjectFile? other) 
         {
-            if (this.UpdatedTime.CompareTo(other.UpdatedTime) == 0)
-                return this.DataSize.CompareTo(other.DataSize);
-            return this.UpdatedTime.CompareTo(other.UpdatedTime);
+            if (UpdatedTime.CompareTo(other.UpdatedTime) == 0)
+                return DataSize.CompareTo(other.DataSize);
+            return UpdatedTime.CompareTo(other.UpdatedTime);
         }
         /// <summary>
         /// IEquatable Implementation: Checks Data Name

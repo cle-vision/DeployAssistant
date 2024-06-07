@@ -143,55 +143,55 @@ namespace SimpleBinaryVCS.Model
         public ProjectData(string projectPath)
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
-            this.ProjectPath = projectPath;
-            this.RevisionNumber = 0;
-            this.ProjectFiles = new Dictionary<string, ProjectFile>(StringComparer.OrdinalIgnoreCase);
-            this.ChangedFiles = new List<ChangedFile>();
+            ProjectPath = projectPath;
+            RevisionNumber = 0;
+            ProjectFiles = new Dictionary<string, ProjectFile>(StringComparer.OrdinalIgnoreCase);
+            ChangedFiles = new List<ChangedFile>();
         }
         public ProjectData(ProjectData srcProjectData)
         {
-            this.ProjectName = srcProjectData.ProjectName;
-            this.ProjectPath = srcProjectData.ProjectPath;
-            this.UpdaterName = srcProjectData.UpdaterName;
-            this.UpdatedTime = srcProjectData.UpdatedTime;
-            this.UpdatedVersion = srcProjectData.UpdatedVersion;
-            this.ConductedPC = srcProjectData.ConductedPC;
-            this.UpdateLog = srcProjectData.UpdateLog;
-            this.ChangeLog = srcProjectData.ChangeLog;
-            this.NumberOfChanges = srcProjectData.NumberOfChanges;
-            this.RevisionNumber = srcProjectData.RevisionNumber;
-            this.ProjectFiles = srcProjectData.CloneProjectFiles();
-            this.ChangedFiles = srcProjectData.CloneChangedFiles();
+            ProjectName = srcProjectData.ProjectName;
+            ProjectPath = srcProjectData.ProjectPath;
+            UpdaterName = srcProjectData.UpdaterName;
+            UpdatedTime = srcProjectData.UpdatedTime;
+            UpdatedVersion = srcProjectData.UpdatedVersion;
+            ConductedPC = srcProjectData.ConductedPC;
+            UpdateLog = srcProjectData.UpdateLog;
+            ChangeLog = srcProjectData.ChangeLog;
+            NumberOfChanges = srcProjectData.NumberOfChanges;
+            RevisionNumber = srcProjectData.RevisionNumber;
+            ProjectFiles = srcProjectData.CloneProjectFiles();
+            ChangedFiles = srcProjectData.CloneChangedFiles();
         }
         public ProjectData(ProjectData srcProjectData, string projectPath, string updaterName, 
             DateTime updateTime, string updatedVersion, string conductedPC, string updateLog, string? changeLog)
         {
-            this.ProjectName = srcProjectData.ProjectName;
-            this.ProjectPath = projectPath;
-            this.UpdaterName = updaterName;
-            this.UpdatedTime = updateTime;
-            this.UpdatedVersion = updatedVersion;
-            this.ConductedPC = conductedPC;
-            this.UpdateLog = updateLog;
-            this.ChangeLog = changeLog ?? "";
-            this.NumberOfChanges = srcProjectData.ChangedFiles.Count;
-            this.RevisionNumber = ++srcProjectData.RevisionNumber;
-            this.ProjectFiles = srcProjectData.CloneProjectFiles();
-            this.ChangedFiles = srcProjectData.CloneChangedFiles();
+            ProjectName = srcProjectData.ProjectName;
+            ProjectPath = projectPath;
+            UpdaterName = updaterName;
+            UpdatedTime = updateTime;
+            UpdatedVersion = updatedVersion;
+            ConductedPC = conductedPC;
+            UpdateLog = updateLog;
+            ChangeLog = changeLog ?? "";
+            NumberOfChanges = srcProjectData.ChangedFiles.Count;
+            RevisionNumber = ++srcProjectData.RevisionNumber;
+            ProjectFiles = srcProjectData.CloneProjectFiles();
+            ChangedFiles = srcProjectData.CloneChangedFiles();
         }
         public ProjectData(ProjectData srcProjectData, bool IsReverting)
         {
-            this.ProjectName = srcProjectData.ProjectName;
-            this.ProjectPath = srcProjectData.ProjectPath;
-            this.UpdaterName = srcProjectData.UpdaterName;
-            this.UpdatedTime = srcProjectData.UpdatedTime;
-            this.UpdatedVersion = srcProjectData.UpdatedVersion;
-            this.ConductedPC = srcProjectData.ConductedPC;
-            this.UpdateLog = srcProjectData.UpdateLog;
-            this.ChangeLog = srcProjectData.ChangeLog;
-            this.NumberOfChanges = srcProjectData.NumberOfChanges;
-            this.RevisionNumber = srcProjectData.RevisionNumber;
-            this.ProjectFiles = srcProjectData.CloneProjectFiles();
+            ProjectName = srcProjectData.ProjectName;
+            ProjectPath = srcProjectData.ProjectPath;
+            UpdaterName = srcProjectData.UpdaterName;
+            UpdatedTime = srcProjectData.UpdatedTime;
+            UpdatedVersion = srcProjectData.UpdatedVersion;
+            ConductedPC = srcProjectData.ConductedPC;
+            UpdateLog = srcProjectData.UpdateLog;
+            ChangeLog = srcProjectData.ChangeLog;
+            NumberOfChanges = srcProjectData.NumberOfChanges;
+            RevisionNumber = srcProjectData.RevisionNumber;
+            ProjectFiles = srcProjectData.CloneProjectFiles();
             if (IsReverting)
             {
                 this.ChangedFiles = srcProjectData.CloneChangedFiles();

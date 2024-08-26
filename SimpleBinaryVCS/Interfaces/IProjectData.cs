@@ -1,4 +1,6 @@
 ﻿using DeployAssistant.Model;
+using System.Diagnostics;
+using System.IO;
 
 namespace SimpleBinaryVCS.Interfaces
 {

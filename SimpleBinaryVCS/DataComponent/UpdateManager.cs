@@ -29,11 +29,6 @@ namespace SimpleBinaryVCS.DataComponent
         {
         }
         
-        /// <summary>
-        /// Requires Updater Name, Log, and Current Project Path
-        /// </summary>
-        /// <param name="updaterName"></param>
-        /// <param name="updateLog"></param>
         public void UpdateProjectMain(string updaterName, string updateLog, string currentProjectPath)
         {
             if (_projectMetaData == null) { MessageBox.Show("Project MetaData on Update Manager is Missing"); return; }
@@ -81,6 +76,7 @@ namespace SimpleBinaryVCS.DataComponent
             updatedProjectData.RevisionNumber = _projectMetaData.LocalUpdateCount;
             ProjectUpdateEventHandler?.Invoke(updatedProjectData);
             ManagerStateEventHandler?.Invoke(MetaDataState.Idle);
+            MessageBox.Show($"Update Finished! to {newVersionName}");
         }
 
         public void IntegrateProjectMain(string updaterName, string updateLog, string currentProjectPath, List<ChangedFile>? fileDifferences)
@@ -276,6 +272,7 @@ namespace SimpleBinaryVCS.DataComponent
         {
             return $"{projData.ProjectName}_{Environment.MachineName}_{DateTime.Now.ToString("yyyy_MM_dd")}_v{currentUpdateCount + 1}";
         }
+
         #region MetaData CallBack 
         public void MetaDataManager_StagedChangesCallBack(object fileChangeListObj)
         {

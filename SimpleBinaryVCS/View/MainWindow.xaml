@@ -215,7 +215,7 @@
                         >
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Filename" Binding="{Binding DataName}" Width ="2.75*"/>
-                            <DataGridTextColumn Header="Build Version" Binding="{Binding BuildVersion}" Width ="3*"/>
+                            <DataGridTextColumn Header="Build Version" Binding="{Binding ProductVersion}" Width ="3*"/>
                             <DataGridTextColumn Header="Project Version" Binding="{Binding DeployedProjectVersion}" Width ="3*"/>
                             <DataGridTextColumn Header="HashValue" Binding="{Binding DataHash}" Width ="0.25*"/>
                             <DataGridTextColumn Header="ChangedState" Binding="{Binding DataState}" Width ="1*"/>
@@ -352,8 +352,9 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Filename" Binding="{Binding DataName}" Width ="1*"/>
                         <DataGridTextColumn Header="FileRelPath" Binding="{Binding DataRelPath}" Width ="3*"/>
-                        <DataGridTextColumn Header="Build Version" Binding="{Binding BuildVersion}" Width ="2*"/>
-                        <DataGridTextColumn Header="DeployedV" Binding="{Binding DeployedProjectVersion}" Width ="1*"/>
+                        <DataGridTextColumn Header="FileV" Binding="{Binding BuildVersion}" Width ="1*"/>
+                        <DataGridTextColumn Header="FileFullV" Binding="{Binding ProductVersion}" Width ="1*"/>
+                        <DataGridTextColumn Header="DeployedV" Binding="{Binding DeployedProjectVersion}" Width ="0.5*"/>
                         <DataGridTextColumn Header="Updated Date" Binding="{Binding UpdatedTime}" Width ="2*"/>
                         <DataGridTextColumn Header="Hash" Binding="{Binding DataHash}" Width ="1*"/>
                     </DataGrid.Columns>
@@ -427,7 +428,7 @@
                     <ListView.View>
                         <GridView>
                             <GridViewColumn  Header="Name" DisplayMemberBinding="{Binding DataName}" Width ="50" />
-                            <GridViewColumn  Header="Version" DisplayMemberBinding="{Binding BuildVersion}" Width ="50" />
+                            <GridViewColumn  Header="Version" DisplayMemberBinding="{Binding ProductVersion}" Width ="50" />
                             <GridViewColumn  Header="FilePath" DisplayMemberBinding="{Binding DataRelPath}" Width ="100" />
                             <GridViewColumn  Header="Change Type" DisplayMemberBinding="{Binding DataState}" Width ="100" />
                         </GridView>

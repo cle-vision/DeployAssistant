@@ -71,7 +71,7 @@ namespace SimpleBinaryVCS.Utils
             {
                 var jsonDataBase64 = File.ReadAllText(filePath);
                 var jsonDataBytes = Convert.FromBase64String(jsonDataBase64);
-                string jsonData = System.Text.Encoding.UTF8.GetString(jsonDataBytes);
+                string jsonData = Encoding.UTF8.GetString(jsonDataBytes);
                 ProjectMetaData? data = JsonSerializer.Deserialize<ProjectMetaData>(jsonData);
                 if (data != null)
                 {

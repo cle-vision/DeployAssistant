@@ -20,6 +20,7 @@ namespace SimpleBinaryVCS.Model
         public string DataSrcPath { get; set; }
         public string DataRelPath { get; set; }
         public string DataHash { get; set; }
+        public string ProductVersion { get; set; } = "";
         #endregion
 
         #region [JsonIgnore] 
@@ -34,7 +35,8 @@ namespace SimpleBinaryVCS.Model
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         [JsonConstructor]
         public ProjectFile(ProjectDataType DataType, long DataSize, string BuildVersion, string DeployedProjectVersion, 
-            DateTime UpdatedTime, DataState DataState, string dataName, string dataSrcPath, string dataRelPath, string dataHash, bool IsDstFile) 
+            DateTime UpdatedTime, DataState DataState, string dataName, string dataSrcPath, string dataRelPath, 
+            string dataHash, bool IsDstFile, string? productVersion)
         {
             this.DataType = DataType;
             this.DataSize = DataSize;
@@ -47,15 +49,17 @@ namespace SimpleBinaryVCS.Model
             DataRelPath = dataRelPath;
             DataHash = dataHash;
             this.IsDstFile = IsDstFile;
+            ProductVersion = productVersion ?? "Empty";
         }
         #region Overloaded Constructors
         /// <summary>
         /// Lacks FileHash, DeployedProjectVersion, FileChangedState
         /// </summary>
-        public ProjectFile(long fileSize, string? fileVersion, string fileName, string fileSrcPath, string fileRelPath, DataState changedState)
+        public ProjectFile(long fileSize, FileVersionInfo fileVersionInfo, string fileName, string fileSrcPath, string fileRelPath, DataState changedState)
         {
+            DataType = ProjectDataType.File; 
+            BuildVersion = fileVersionInfo.FileVersion ?? "";
             DataSize = fileSize;
-            BuildVersion = fileVersion ?? "";
             DataName = fileName;
             DataSrcPath = fileSrcPath;
             DataRelPath = fileRelPath;
@@ -63,22 +67,24 @@ namespace SimpleBinaryVCS.Model
             DeployedProjectVersion = "";
             UpdatedTime = DateTime.Now;
             DataState = changedState;
+            ProductVersion = fileVersionInfo.ProductVersion ?? "Empty";
         }
         /// <summary>
         /// For PreStagedProjectFile Data Type = File 
         /// </summary>
-        public ProjectFile(long DataSize, string? BuildVersion, string DataName, string DataSrcPath, string DataRelPath)
+        public ProjectFile(long dataSize, FileVersionInfo fileVersionInfo, string dataName, string dataSrcName, string dataRelPath)
         {
             DataType = ProjectDataType.File;
-            this.DataSize = DataSize;
-            this.BuildVersion = BuildVersion ?? "";
+            DataSize = dataSize;
+            BuildVersion = fileVersionInfo.FileVersion ?? "";
             DeployedProjectVersion = "";
             UpdatedTime = DateTime.MinValue;
             DataState = DataState.PreStaged;
-            this.DataName = DataName;
-            this.DataSrcPath = DataSrcPath;
-            this.DataRelPath= DataRelPath;
+            DataName = dataName;
+            DataSrcPath = dataSrcName;
+            DataRelPath= dataRelPath;
             DataHash = "";
+            ProductVersion = fileVersionInfo.ProductVersion ?? "Empty";
         }
         /// <summary>
         /// For PreStagedProjectFile Data Type = Directory 
@@ -95,6 +101,7 @@ namespace SimpleBinaryVCS.Model
             this.DataSrcPath = DataSrcPath;
             this.DataRelPath = DataRelPath;
             DataHash = "";
+            ProductVersion = "";
         }
         /// <summary>
         /// Deep Copy of ProjectFile
@@ -112,6 +119,7 @@ namespace SimpleBinaryVCS.Model
             DataSrcPath = srcData.DataSrcPath;
             DataRelPath = srcData.DataRelPath;
             DataHash = srcData.DataHash;
+            ProductVersion = srcData.ProductVersion ?? "Empty";
         }
         public ProjectFile(ProjectFile updatedData, string deployedProjectVersion, string currentProjectPath)
         {
@@ -125,6 +133,7 @@ namespace SimpleBinaryVCS.Model
             DataSrcPath = currentProjectPath;
             DataRelPath = updatedData.DataRelPath;
             DataHash = updatedData.DataHash;
+            ProductVersion = updatedData.ProductVersion ?? "Empty";
         }
         public ProjectFile(ProjectFile srcData, DataState state)
         {
@@ -138,6 +147,7 @@ namespace SimpleBinaryVCS.Model
             DataSrcPath = srcData.DataSrcPath;
             DataRelPath = srcData.DataRelPath;
             DataHash = srcData.DataHash;
+            ProductVersion = srcData.ProductVersion ?? "Empty";
         }
         public ProjectFile(ProjectFile srcData, DataState DataState, string dataSrcPath)
         {
@@ -151,6 +161,7 @@ namespace SimpleBinaryVCS.Model
             DataSrcPath = dataSrcPath;
             DataRelPath = srcData.DataRelPath;
             DataHash = srcData.DataHash;
+            ProductVersion = srcData.ProductVersion ?? "Empty";
         }
         public ProjectFile(string fileSrcPath, string fileRelPath, string? fileHash, DataState DataState, ProjectDataType dataType)
         {
@@ -159,14 +170,16 @@ namespace SimpleBinaryVCS.Model
                 string fileFullPath = Path.Combine(fileSrcPath, fileRelPath);
                 if (dataType == ProjectDataType.File)
                 {
-                    var fileInfo = FileVersionInfo.GetVersionInfo(fileFullPath);
+                    var fileVersionInfo = FileVersionInfo.GetVersionInfo(fileFullPath);
                     DataSize = new FileInfo(fileFullPath).Length;
-                    BuildVersion = fileInfo.FileVersion ?? "";
+                    BuildVersion = fileVersionInfo.FileVersion ?? "";
+                    ProductVersion = fileVersionInfo.ProductVersion ?? "Empty";
                 }
                 else
                 {
                     DataSize = 0;
                     BuildVersion = "";
+                    ProductVersion= "";
                 }
                 DeployedProjectVersion = "";
                 DataSrcPath = fileSrcPath;
@@ -208,6 +221,7 @@ namespace SimpleBinaryVCS.Model
             DataSrcPath = "";
             DataRelPath = "";
             DataHash = "";
+            ProductVersion = "Empty";
         }
         #endregion
         public int CompareTo(ProjectFile? other) 

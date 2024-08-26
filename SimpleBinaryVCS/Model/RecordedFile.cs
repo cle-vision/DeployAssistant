@@ -1,5 +1,6 @@
 ﻿using SimpleBinaryVCS.DataComponent;
 using SimpleBinaryVCS.Interfaces;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 
 namespace DeployAssistant.Model
@@ -13,6 +14,8 @@ namespace DeployAssistant.Model
         public DateTime UpdatedTime { get; set; }
 
         public string DataName { get; set; }
+        public FileVersionInfo? FileVersionInfo { get; set; } = null;
+
 
         #region [JsonIgnore]
         [JsonIgnore]

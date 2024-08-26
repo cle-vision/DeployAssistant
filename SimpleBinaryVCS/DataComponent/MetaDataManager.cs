@@ -227,7 +227,7 @@ namespace SimpleBinaryVCS.DataComponent
                     return; 
                 }
 
-                ProjectData newProjectData = new ProjectData(projectPath);
+                ProjectData newProjectData = new(projectPath);
                 newProjectData.ProjectName = Path.GetFileName(projectPath);
                 newProjectData.ConductedPC = Environment.MachineName;
                 newProjectData.UpdatedVersion = GetProjectVersionName(newProjectData, true);
@@ -238,11 +238,12 @@ namespace SimpleBinaryVCS.DataComponent
                 ConcurrentDictionary<string, ProjectFile> tempDict = new(StringComparer.OrdinalIgnoreCase);
                 Parallel.ForEach(newProjectFiles, options, filePath =>
                 {
+                    var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
                     ProjectFile newFile = new ProjectFile
                         (
                         ProjectDataType.File,
                         new FileInfo(filePath).Length,
-                        FileVersionInfo.GetVersionInfo(filePath).FileVersion,
+                        fileVersionInfo.FileVersion,
                         newProjectData.UpdatedVersion,
                         DateTime.Now,
                         DataState.None,
@@ -250,7 +251,8 @@ namespace SimpleBinaryVCS.DataComponent
                         projectPath,
                         Path.GetRelativePath(projectPath, filePath),
                         "",
-                        true
+                        true, 
+                        fileVersionInfo.ProductVersion
                         );
                     tempDict.TryAdd(newFile.DataRelPath, newFile); // Create ProjectFile object
                     _hashTool.GetFileMD5CheckSum(newFile);
@@ -272,7 +274,8 @@ namespace SimpleBinaryVCS.DataComponent
                         projectPath,
                         Path.GetRelativePath(projectPath, dirPath),
                         "",
-                        true
+                        true, 
+                        ""
                         );
                     newProjectData.ProjectFiles.TryAdd(newFile.DataRelPath, newFile);
                     newProjectData.ChangedFiles.Add(new ChangedFile(new ProjectFile(newFile), DataState.Added));
@@ -374,7 +377,11 @@ namespace SimpleBinaryVCS.DataComponent
 
         public void RequestProjectIntegrityCheck()
         {
-            var result = _fileManager.MainProjectIntegrityCheck();
+            var integrityTask = _fileManager.MainProjectIntegrityCheck();
+            if (!integrityTask.Result)
+            {
+                _currentDeployMode = DeployMode.IntegrityCheck;
+            }
         }
 
         public void RequestFileRestore(ProjectFile targetFile, DataState state)

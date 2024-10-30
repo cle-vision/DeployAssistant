@@ -26,8 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dirkster.AvalonDock" Version="4.72.1" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.0.2" />
-    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>

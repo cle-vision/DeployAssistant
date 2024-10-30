@@ -19,7 +19,7 @@ namespace SimpleBinaryVCS.ViewModel
         private ObservableCollection<ProjectData>? _backupProjectDataList;
         public ObservableCollection<ProjectData> BackupProjectDataList
         {
-            get => _backupProjectDataList ??= new ObservableCollection<ProjectData>();
+            get => _backupProjectDataList ??= [];
             set
             {
                 _backupProjectDataList = value;
@@ -89,7 +89,7 @@ namespace SimpleBinaryVCS.ViewModel
         private ObservableCollection<ProjectFile>? _diffLog;
         public ObservableCollection<ProjectFile> DiffLog
         {
-            get => _diffLog ??= new ObservableCollection<ProjectFile>();
+            get => _diffLog ??= [];
             set
             {
                 _diffLog = value;
@@ -97,28 +97,29 @@ namespace SimpleBinaryVCS.ViewModel
             }
         }
 
-        private MetaDataManager _metaDataManager;
+        private readonly MetaDataManager _metaDataManager;
         private MetaDataState? _metaDataState = MetaDataState.Idle;
         public BackupViewModel()
         {
-            this._metaDataManager = App.MetaDataManager;
-            this._metaDataManager.FetchRequestEventHandler += FetchRequestCallBack;
-            this._metaDataManager.ProjExportEventHandler += ExportRequestCallBack;
-            this._metaDataManager.ManagerStateEventHandler += MetaDataStateChangeCallBack;
+            _metaDataManager = App.MetaDataManager;
+            _metaDataManager.FetchRequestEventHandler += FetchRequestCallBack;
+            _metaDataManager.ProjExportEventHandler += ExportRequestCallBack;
+            _metaDataManager.ManagerStateEventHandler += MetaDataStateChangeCallBack;
         }
 
         private bool CanFetch(object obj)
         {
-            if (App.Current == null || _metaDataManager.ProjectMetaData == null) return false;
+            if (WPF.Application.Current == null || _metaDataManager.ProjectMetaData == null) 
+            { 
+                return false;
+            };
             return true;
         }
         private void Fetch(object obj)
         {
             SelectedItem = null;
-            //Set up Current Project at Main 
             if (_metaDataManager.CurrentProjectPath == null || _metaDataManager.ProjectMetaData == null) return;
             _metaDataManager.RequestFetchBackup();
-
         }
 
         private void CompareSrcProjWithMain(object obj)
@@ -139,9 +140,11 @@ namespace SimpleBinaryVCS.ViewModel
                 return;
             }
             var mainWindow = obj as WPF.Window;
-            IntegrityLogWindow logWindow = new IntegrityLogWindow(SelectedItem);
-            logWindow.Owner = mainWindow;
-            logWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+            IntegrityLogWindow logWindow = new(SelectedItem)
+            {
+                Owner = mainWindow,
+                WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+            };
             logWindow.Show();
         }
         private bool CanRevert(object obj)
@@ -218,10 +221,6 @@ namespace SimpleBinaryVCS.ViewModel
         }
 
         #region CallBack From Model Events 
-        private void ProjectLoadedCallBack(object? obj)
-        {
-
-        }
         private void FetchRequestCallBack(object backupListObj)
         {
             if (backupListObj is not ObservableCollection<ProjectData> backupList) return;

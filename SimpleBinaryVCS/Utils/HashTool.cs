@@ -16,7 +16,7 @@ namespace SimpleBinaryVCS.Utils
         /// <param name="dstFile"></param>
         /// <param name="result">First is srcHash, Second is dstHash</param>
         /// <returns></returns>
-        public bool TryCompareMD5CheckSum(string? srcFile, string? dstFile, out (string?, string?) result)
+        public static bool TryCompareMD5CheckSum(string? srcFile, string? dstFile, out (string?, string?) result)
         {
             if (srcFile == null || dstFile == null)
             {
@@ -44,7 +44,7 @@ namespace SimpleBinaryVCS.Utils
             result = (srcHashString, dstHashString);
             return srcHashString == dstHashString;
         }
-        public string GetFileMD5CheckSum(string projectPath, string srcFileRelPath)
+        public static string GetFileMD5CheckSum(string projectPath, string srcFileRelPath)
         {
             byte[] srcHashBytes;
             string srcFileFullPath = Path.Combine(projectPath, srcFileRelPath);
@@ -61,7 +61,7 @@ namespace SimpleBinaryVCS.Utils
             md5.Dispose();
             return BitConverter.ToString(srcHashBytes).Replace("-", "");
         }
-        public string GetFileMD5CheckSum(string filePath)
+        public static string GetFileMD5CheckSum(string filePath)
         {
             byte[] srcHashBytes;
             using MD5 md5 = MD5.Create();
@@ -77,7 +77,7 @@ namespace SimpleBinaryVCS.Utils
             md5.Dispose();
             return BitConverter.ToString(srcHashBytes).Replace("-", "");
         }
-        public async Task GetFileMD5CheckSumAsync(ProjectFile file)
+        public static async Task GetFileMD5CheckSumAsync(ProjectFile file)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace SimpleBinaryVCS.Utils
                 WPF.MessageBox.Show($"Error occured {ex.Message} \nwhile Computing hash async by this file {file.DataName}");
             }
         }
-        public void GetFileMD5CheckSum(ProjectFile file)
+        public static void GetFileMD5CheckSum(ProjectFile file)
         {
             try
             {
@@ -125,7 +125,7 @@ namespace SimpleBinaryVCS.Utils
                 WPF.MessageBox.Show($"Error occured {ex.Message} \nwhile Computing hash by this file {file.DataName}");
             }
         }
-        public async Task<string?> GetFileMD5CheckSumAsync(string fileFullPath)
+        public static async Task<string?> GetFileMD5CheckSumAsync(string fileFullPath)
         {
             try
             {
@@ -151,24 +151,20 @@ namespace SimpleBinaryVCS.Utils
             }
         }
         #endregion
-        public string GetUniqueComputerID(string userID)
+        public static string GetUniqueComputerID(string userID)
         {
-            using (SHA256 sha256Hash = SHA256.Create())
+            byte[] bytes = SHA256.HashData(Encoding.UTF8.GetBytes(userID));
+            // Convert the hash bytes to a 10-character string by taking the first 5 bytes (40 bits) of the hash
+            StringBuilder builder = new ();
+            for (int i = 0; i < 5; i++)
             {
-                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(userID));
-
-                // Convert the hash bytes to a 10-character string by taking the first 5 bytes (40 bits) of the hash
-                StringBuilder builder = new StringBuilder();
-                for (int i = 0; i < 5; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
+                builder.Append(bytes[i].ToString("x2"));
             }
+            return builder.ToString();
         }
-        public string GetUniqueProjectDataID(ProjectData projectData)
+        public static string GetUniqueProjectDataID(ProjectData projectData)
         {
-            StringBuilder filesListWithHash = new StringBuilder();
+            StringBuilder filesListWithHash = new ();
             foreach (ProjectFile file in projectData.ProjectFiles.Values)
             {
                 filesListWithHash.Append($"{file.DataRelPath}\\{file.DataHash}");

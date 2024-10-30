@@ -6,8 +6,6 @@ using SimpleBinaryVCS.Utils;
 using SimpleBinaryVCS.View;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using static System.Windows.Forms.AxHost;
-using WinForms = System.Windows.Forms;
 using WPF = System.Windows;
 namespace SimpleBinaryVCS.ViewModel
 {
@@ -21,7 +19,7 @@ namespace SimpleBinaryVCS.ViewModel
         private ObservableCollection<ProjectFile>? _changedFileList; 
         public ObservableCollection<ProjectFile> ChangedFileList 
         {
-            get => _changedFileList ??= new ObservableCollection<ProjectFile>();
+            get => _changedFileList ??= [];
             set
             {
                 _changedFileList = value;
@@ -97,23 +95,23 @@ namespace SimpleBinaryVCS.ViewModel
         private ICommand? getDeploySrcDir;
         public ICommand GetDeploySrcDir => getDeploySrcDir ??= new RelayCommand(SetDeploySrcDirectory, CanSetDeployDir);
         
-        private MetaDataManager _metaDataManager;
+        private readonly MetaDataManager _metaDataManager;
         private MetaDataState _metaDataState = MetaDataState.Idle;
         private ProjectData? _srcProjectData;
         private ProjectData? _dstProjData;
         string? _deploySrcPath;
         public FileTrackViewModel()
         {
-            this._metaDataManager = App.MetaDataManager;
-            this._metaDataManager.OverlappedFileSortEventHandler += OverlapFileSortCallBack; 
-            this._metaDataManager.SrcProjectLoadedEventHandler += SrcProjectDataCallBack;
-            this._metaDataManager.PreStagedChangesEventHandler += PreStagedChangesCallBack;
-            this._metaDataManager.IntegrityCheckCompleteEventHandler += ProjectIntegrityCheckCallBack;
-            this._metaDataManager.FileChangesEventHandler += MetaDataManager_FileChangeCallBack;
-            this._metaDataManager.ManagerStateEventHandler += MetaDataManager_IssueEventCallBack;
-            this._metaDataManager.ProjLoadedEventHandler += MetaDataManager_ProjLoadedCallBack;
-            this._metaDataManager.ProjComparisonCompleteEventHandler += MetaDataManager_ProjComparisonCompleteCallBack;
-            this._metaDataManager.SimilarityCheckCompleteEventHandler += MetaDataManager_SimilarityCheckCompleteCallBack;
+            _metaDataManager = App.MetaDataManager;
+            _metaDataManager.OverlappedFileSortEventHandler += OverlapFileSortCallBack; 
+            _metaDataManager.SrcProjectLoadedEventHandler += SrcProjectDataCallBack;
+            _metaDataManager.PreStagedChangesEventHandler += PreStagedChangesCallBack;
+            _metaDataManager.IntegrityCheckCompleteEventHandler += ProjectIntegrityCheckCallBack;
+            _metaDataManager.FileChangesEventHandler += MetaDataManager_FileChangeCallBack;
+            _metaDataManager.ManagerStateEventHandler += MetaDataManager_IssueEventCallBack;
+            _metaDataManager.ProjLoadedEventHandler += MetaDataManager_ProjLoadedCallBack;
+            _metaDataManager.ProjComparisonCompleteEventHandler += MetaDataManager_ProjComparisonCompleteCallBack;
+            _metaDataManager.SimilarityCheckCompleteEventHandler += MetaDataManager_SimilarityCheckCompleteCallBack;
         }
 
         private bool CanRefresh(object obj)
@@ -133,7 +131,7 @@ namespace SimpleBinaryVCS.ViewModel
         {
             try
             {
-                var openUpdateDir = new WinForms.FolderBrowserDialog();
+                var openUpdateDir = new FolderBrowserDialog();
                 if (openUpdateDir.ShowDialog() == DialogResult.OK)
                 {
                     _srcProjectData = null;
@@ -171,9 +169,11 @@ namespace SimpleBinaryVCS.ViewModel
         public void OpenDeployedProjectInfo(object obj)
         {
             var mainWindow = obj as WPF.Window;
-            IntegrityLogWindow logWindow = new IntegrityLogWindow(_srcProjectData);
-            logWindow.Owner = mainWindow;
-            logWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+            IntegrityLogWindow logWindow = new(_srcProjectData)
+            {
+                Owner = mainWindow,
+                WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+            };
             logWindow.Show();
         }
 
@@ -241,15 +241,14 @@ namespace SimpleBinaryVCS.ViewModel
             if (projObj is not ProjectData projectData) return;
             _dstProjData = projectData;
         }
-        private void StageRequestCallBack(ObservableCollection<ProjectFile> stagedChanges)
-        {
-            _changedFileList = stagedChanges;
-        }
+
         private void OverlapFileSortCallBack(List<ChangedFile> overlappedFileObj, List<ChangedFile> newFileObj)
         {
-            OverlapFileWindow overlapFileWindow = new OverlapFileWindow(overlappedFileObj, newFileObj);
-            overlapFileWindow.Owner = App.Current.MainWindow;
-            overlapFileWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+            OverlapFileWindow overlapFileWindow = new(overlappedFileObj, newFileObj)
+            {
+                Owner = WPF.Application.Current.MainWindow,
+                WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+            };
             overlapFileWindow.Show();
         }
 
@@ -270,24 +269,28 @@ namespace SimpleBinaryVCS.ViewModel
         {
             if (changedFileList == null) { MessageBox.Show("Model Binding Issue: ChangedList is Empty"); return; }
 
-            App.Current.Dispatcher.Invoke((Delegate)(() =>
+            WPF.Application.Current.Dispatcher.Invoke((Delegate)(() =>
             {
-                var mainWindow = App.Current.MainWindow;
-                IntegrityLogWindow logWindow = new IntegrityLogWindow(_dstProjData, changeLog, changedFileList);
-                logWindow.Owner = mainWindow;
-                logWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+                var mainWindow = WPF.Application.Current.MainWindow;
+                IntegrityLogWindow logWindow = new (_dstProjData, changeLog, changedFileList)
+                {
+                    Owner = mainWindow,
+                    WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+                };
                 logWindow.Show();
             }));
         }
 
         private void MetaDataManager_ProjComparisonCompleteCallBack(ProjectData srcProject, ProjectData dstProject, List<ChangedFile> diff)
         {
-            App.Current.Dispatcher.Invoke(() =>
+            WPF.Application.Current.Dispatcher.Invoke(() =>
             {
-                var mainWindow = App.Current.MainWindow;
-                VersionDiffWindow versionDiffWindow = new VersionDiffWindow(srcProject, dstProject, diff);
-                versionDiffWindow.Owner = mainWindow;
-                versionDiffWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+                var mainWindow = WPF.Application.Current.MainWindow;
+                VersionDiffWindow versionDiffWindow = new(srcProject, dstProject, diff)
+                {
+                    Owner = mainWindow,
+                    WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+                };
                 versionDiffWindow.Show();
             });
         }
@@ -307,9 +310,11 @@ namespace SimpleBinaryVCS.ViewModel
             App.Current.Dispatcher.Invoke(() =>
             {
                 var mainWindow = App.Current.MainWindow;
-                VersionComparisonWindow versionCompWindow = new VersionComparisonWindow(data, diffList);
-                versionCompWindow.Owner = mainWindow;
-                versionCompWindow.WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner;
+                VersionComparisonWindow versionCompWindow = new(data, diffList)
+                {
+                    Owner = mainWindow,
+                    WindowStartupLocation = WPF.WindowStartupLocation.CenterOwner
+                };
                 versionCompWindow.Show();
             });
         }

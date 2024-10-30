@@ -13,15 +13,19 @@ namespace SimpleBinaryVCS.Model
         {
             if (srcChangedfile.SrcFile != null)
             {
-                SrcFile = new ProjectFile(srcChangedfile.SrcFile);
-                SrcFile.IsDstFile = false; 
+                SrcFile = new(srcChangedfile.SrcFile)
+                {
+                    IsDstFile = false
+                };
             }
             else
                 SrcFile = null;
             if (srcChangedfile.DstFile != null)
             {
-                DstFile = new ProjectFile(srcChangedfile.DstFile);
-                DstFile.IsDstFile = true; 
+                DstFile = new ProjectFile(srcChangedfile.DstFile)
+                {
+                    IsDstFile = true
+                };
             }
             else
                 DstFile = null;
@@ -31,7 +35,7 @@ namespace SimpleBinaryVCS.Model
         {
             SrcFile = null;
             this.DstFile = DstFile;
-            DstFile.IsDstFile = (DataState & DataState.Overlapped) == 0 ? true : false; 
+            DstFile.IsDstFile = (DataState & DataState.Overlapped) == 0; 
             this.DataState = DataState;
         }
         public ChangedFile(ProjectFile SrcFile,  ProjectFile DstFile, DataState DataState, bool RegisterChanges)
@@ -39,7 +43,7 @@ namespace SimpleBinaryVCS.Model
             this.SrcFile = SrcFile;
             SrcFile.IsDstFile = false; 
             this.DstFile = DstFile;
-            DstFile.IsDstFile = (DataState & DataState.Overlapped) == 0 ? true : false;
+            DstFile.IsDstFile = (DataState & DataState.Overlapped) == 0;
             this.DataState = DataState;
         }
         [JsonConstructor]

@@ -8,11 +8,11 @@ namespace SimpleBinaryVCS.DataComponent
 {
     public class UpdateManager : IManager
     {
+        private readonly FileHandlerTool _fileHandlerTool;
         private ProjectMetaData? _projectMetaData;
         private ProjectData? _projectMain;
         private ProjectData? _srcProjectData;
         private List<ChangedFile>? _currentProjectFileChanges;
-        private FileHandlerTool _fileHandlerTool;
         private Dictionary<string, ProjectFile> _backupFiles;
         private Dictionary<string, ProjectFile> _srcFileHash; 
 

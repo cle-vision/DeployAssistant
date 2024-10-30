@@ -13,15 +13,15 @@ namespace SimpleBinaryVCS.View
         public IntegrityLogWindow(ProjectData projData, string versionLog, ObservableCollection<ProjectFile> fileList)
         {
             InitializeComponent();
-            VersionCheckViewModel versionCheckViewModel = new VersionCheckViewModel(projData, versionLog, fileList);
-            this.DataContext = versionCheckViewModel;
+            VersionCheckViewModel versionCheckViewModel = new (projData, versionLog, fileList);
+            DataContext = versionCheckViewModel;
         }
 
         public IntegrityLogWindow(ProjectData projectData)
         {
             InitializeComponent();
-            VersionCheckViewModel versionCheckViewModel = new VersionCheckViewModel(projectData);
-            this.DataContext = versionCheckViewModel;
+            VersionCheckViewModel versionCheckViewModel = new (projectData);
+            DataContext = versionCheckViewModel;
         }
 
         private void FileFilterKeyword_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)

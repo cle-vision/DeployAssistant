@@ -3,11 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SimpleBinaryVCS.View"
         mc:Ignorable="d"
-        Title="Deploy Assistant" Height="900" Width="1500"
+        Title="Deploy Assistant (DA)" Height="900" Width="1500"
         MinHeight="850"
-        MinWidth="1450">
+        MinWidth="1450" WindowStyle="ToolWindow">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -260,7 +259,7 @@
                           />
             <Grid Grid.Column="1">
                 <ListView
-                    Name="backupList" 
+                    x:Name="VersionList" 
                     ItemsSource="{Binding BackupVM.BackupProjectDataList}"
                     SelectedItem="{Binding BackupVM.SelectedItem}"
                     BorderBrush="#cdcdcd"
@@ -298,9 +297,9 @@
                             <MenuItem Header="Export Full Version" Name="ExportAll" Command="{Binding BackupVM.ExportVersion}"/>
                             <MenuItem Header="Export Version Log" Name="ExportLog" Command="{Binding BackupVM.ExtractVersionLog}"/>
                             <MenuItem Header="Compare With Main" Name="ProjComparison" Command="{Binding BackupVM.CompareDeployedProjectWithMain}"/>
-                            <MenuItem Header="Compare Src With Main" Name="SrcProjComparison" Command="{Binding FileTrackVM.CompareDeployedProjectWithMain}"/>
                             <MenuItem Header="Checkout Version" Name="Checkout" Command="{Binding BackupVM.CheckoutBackup}"/>
                             <MenuItem Header="Full Log" Name="VersionFullLog" Command="{Binding BackupVM.ViewFullLog}"/>
+                            <MenuItem Header="Compare Src With Main" Name="SrcProjComparison" Command="{Binding FileTrackVM.CompareDeployedProjectWithMain}"/>
                             <MenuItem Header="Src Full Log" Name="SrcProjectFullLog" Command="{Binding FileTrackVM.GetDeployedProjectInfo}"/>
                             <MenuItem Header="Src Version Similarities" Name="VersionSimilarities" Command="{Binding FileTrackVM.SrcSimilarityWithBackups}"/>
                             <!--<MenuItem Header="Clean Checkout Version" Name="Restore" Command="{Binding BackupVM.CleanRestoreBackup}"/>-->

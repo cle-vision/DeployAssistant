@@ -49,15 +49,14 @@ namespace SimpleBinaryVCS.DataComponent
             }
         }
 
-        private ProjectMetaData? _projectMetaData;
+        private ProjectMetaData? _dstProjectMetaData;
         public ProjectMetaData? ProjectMetaData
         {
-            get => _projectMetaData;
+            get => _dstProjectMetaData;
             private set
             {
-                if (value == null) throw new ArgumentNullException(nameof(ProjectMetaData));
-                _projectMetaData = value;
-                CurrentProjectPath = value.ProjectPath;
+                _dstProjectMetaData = value;
+                CurrentProjectPath = value!.ProjectPath;
                 MetaDataLoadedEventHandler?.Invoke(value);
             }
         }
@@ -68,8 +67,10 @@ namespace SimpleBinaryVCS.DataComponent
             get => _mainProjectData;
             private set
             {
-                if (value == null || value is not ProjectData) throw new ArgumentNullException(nameof(_mainProjectData));
-                else if (ProjectMetaData == null) throw new ArgumentNullException(nameof(ProjectMetaData));
+                if (ProjectMetaData == null)
+                {
+                    return;
+                }
                 _mainProjectData = new ProjectData(value);
                 ProjectMetaData.SetProjectMain(_mainProjectData);
                 SrcProjectLoadedEventHandler?.Invoke(null); 
@@ -92,12 +93,10 @@ namespace SimpleBinaryVCS.DataComponent
         private UpdateManager _updateManager;
         private ExportManager _exportManager;
         private SettingManager _settingManager;
-        private FileHandlerTool _fileHandlerTool;
-        private HashTool _hashTool; 
+        private readonly FileHandlerTool _fileHandlerTool;
+        private readonly HashTool _hashTool; 
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public MetaDataManager()
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             _fileHandlerTool = App.FileHandlerTool;
             _hashTool = App.HashTool;
@@ -167,7 +166,7 @@ namespace SimpleBinaryVCS.DataComponent
             try
             {
                 CurrentState = MetaDataState.Retrieving;
-                _fileHandlerTool.TryDeserializeProjectMetaData(projectMetaDataPath, out ProjectMetaData? retrievedData);
+                FileHandlerTool.TryDeserializeProjectMetaData(projectMetaDataPath, out ProjectMetaData? retrievedData);
                 if (retrievedData != null)
                 {
                     if (retrievedData.ProjectPath != projectPath)
@@ -204,9 +203,9 @@ namespace SimpleBinaryVCS.DataComponent
             try
             {
                 CurrentState = MetaDataState.Initializing;
-                StringBuilder changeLog = new StringBuilder();
-                ProjectMetaData newProjectRepo = new ProjectMetaData(Path.GetFileName(projectPath), projectPath);
-                ProjectIgnoreData newIgnoreData = new ProjectIgnoreData(projectPath);
+                StringBuilder changeLog = new ();
+                ProjectMetaData newProjectRepo = new (Path.GetFileName(projectPath), projectPath);
+                ProjectIgnoreData newIgnoreData = new (projectPath);
                 newIgnoreData.ConfigureDefaultIgnore(newProjectRepo.ProjectName); 
 
                 var ignoringFilesAndDirsTask = Task.Run(() =>
@@ -227,9 +226,11 @@ namespace SimpleBinaryVCS.DataComponent
                     return; 
                 }
 
-                ProjectData newProjectData = new(projectPath);
-                newProjectData.ProjectName = Path.GetFileName(projectPath);
-                newProjectData.ConductedPC = Environment.MachineName;
+                ProjectData newProjectData = new(projectPath)
+                {
+                    ProjectName = Path.GetFileName(projectPath),
+                    ConductedPC = Environment.MachineName
+                };
                 newProjectData.UpdatedVersion = GetProjectVersionName(newProjectData, true);
                 changeLog.AppendLine($"Project Initialized");
 
@@ -239,7 +240,7 @@ namespace SimpleBinaryVCS.DataComponent
                 Parallel.ForEach(newProjectFiles, options, filePath =>
                 {
                     var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
-                    ProjectFile newFile = new ProjectFile
+                    ProjectFile newFile = new 
                         (
                         ProjectDataType.File,
                         new FileInfo(filePath).Length,
@@ -255,14 +256,14 @@ namespace SimpleBinaryVCS.DataComponent
                         fileVersionInfo.ProductVersion
                         );
                     tempDict.TryAdd(newFile.DataRelPath, newFile); // Create ProjectFile object
-                    _hashTool.GetFileMD5CheckSum(newFile);
+                    HashTool.GetFileMD5CheckSum(newFile);
                 });
                 
                 newProjectData.ProjectFiles = new Dictionary<string, ProjectFile>(tempDict);
 
                 foreach (string dirPath in newProjectDirs)
                 {
-                    ProjectFile newFile = new ProjectFile
+                    ProjectFile newFile = new 
                         (
                         ProjectDataType.Directory,
                         0,
@@ -309,11 +310,6 @@ namespace SimpleBinaryVCS.DataComponent
         public void RequestSrcDataRetrieval(string deployedPath)
         {
              _fileManager.RetrieveDataSrc(deployedPath);
-        }
-
-        public void RequestStagedFileListRefresh(string deployedPath)
-        {
-
         }
 
         public bool RequestFetchBackup()
@@ -399,30 +395,32 @@ namespace SimpleBinaryVCS.DataComponent
             _exportManager.ExportProjectVersionLog(projectData);
         }
 
-        public void RequestExportProjectVersionDiffFiles(List<ChangedFile> FileDiffs)
-        {
-
-        }
+        //public void RequestExportProjectVersionDiffFiles(List<ChangedFile> FileDiffs)
+        //{
+              //TODO: Exporting Project Version Diff files
+        //}
 
         public void RequestProjectCompatibility(ProjectData srcProjectData)
         {
             try
             {
-                if (_projectMetaData == null) return;
+                if (_dstProjectMetaData == null) 
+                { 
+                    return;
+                };
                 List<ProjectSimilarity> projectComparisons = []; 
-                foreach (ProjectData projData in _projectMetaData.ProjectDataList)
+                foreach (ProjectData projData in _dstProjectMetaData.ProjectDataList)
                 {
-                    ProjectSimilarity similaraity = new ProjectSimilarity();
+                    ProjectSimilarity similaraity = new();
                     projectComparisons.Add(similaraity); 
                     //Compute the file differences 
                         try
                         {
-                            int sigDiff = 0; 
-                            List<ChangedFile>? identifiedDiff = _fileManager.FindVersionDifferences(srcProjectData, projData, out sigDiff);
-                            similaraity.projData = projData;
-                            similaraity.numDiffWithResources = identifiedDiff?.Count ?? -1; 
-                            similaraity.numDiffWithoutResources = sigDiff;
-                            similaraity.fileDifferences = identifiedDiff ?? [];
+                            List<ChangedFile>? identifiedDiff = _fileManager.FindVersionDifferences(srcProjectData, projData, out int sigDiff);
+                            similaraity.ProjData = projData;
+                            similaraity.NumDiffWithResources = identifiedDiff?.Count ?? -1; 
+                            similaraity.NumDiffWithoutResources = sigDiff;
+                            similaraity.FileDifferences = identifiedDiff ?? [];
                         }
                         catch(Exception ex)
                         {
@@ -501,13 +499,13 @@ namespace SimpleBinaryVCS.DataComponent
         #endregion
 
         #region Version Management Tools
-        private string GetProjectVersionName(ProjectData projData, bool isNewProject = false)
+        private static string GetProjectVersionName(ProjectData projData, bool isNewProject = false)
         {
             if (!isNewProject)
             {
-                return $"{projData.ProjectName}_{Environment.MachineName}_{DateTime.Now.ToString("yyyy_MM_dd")}_v{projData.RevisionNumber + 1}";
+                return $"{projData.ProjectName}_{Environment.MachineName}_{DateTime.Now:yyyy_MM_dd}_v{projData.RevisionNumber + 1}";
             }
-            return $"{projData.ProjectName}_{Environment.MachineName}_{DateTime.Now.ToString("yyyy_MM_dd")}_v{projData.RevisionNumber}";
+            return $"{projData.ProjectName}_{Environment.MachineName}_{DateTime.Now:yyyy_MM_dd}_v{projData.RevisionNumber}";
         }
 
         #endregion
@@ -525,7 +523,7 @@ namespace SimpleBinaryVCS.DataComponent
         private void FileManager_DataPreStagedCallBack(object preStagedFileListObj)
         {
             if (preStagedFileListObj is not List<ProjectFile> preStagedFileList) return;
-            ObservableCollection<ProjectFile> preStagedChangesObs = new ObservableCollection<ProjectFile>(preStagedFileList);
+            ObservableCollection<ProjectFile> preStagedChangesObs = new (preStagedFileList);
             FileChangesEventHandler?.Invoke(preStagedChangesObs);
         }
 
@@ -536,7 +534,7 @@ namespace SimpleBinaryVCS.DataComponent
                 MessageBox.Show("Improper stagedFile parameter value returned");
                 return;
             }
-            ObservableCollection<ProjectFile> stagedChangesObs = new ObservableCollection<ProjectFile>();
+            ObservableCollection<ProjectFile> stagedChangesObs = [];
             foreach (ChangedFile file in stagedFiles)
             {
                 if (file.DstFile != null) stagedChangesObs.Add(file.DstFile);
@@ -607,22 +605,18 @@ namespace SimpleBinaryVCS.DataComponent
 
         #region Temporary
         #region Exports
-        /// <summary>
-        /// Input: Requested Project Data 
-        /// Output: All the project files, including projectData meta file
-        /// in a @.projectParentDir/Exports/ProjectVersion
-        /// </summary>
-        /// <param name="projectData"></param>
+        ///// <summary>
+        ///// Input: Requested Project Data 
+        ///// Output: All the project files, including projectData meta file
+        ///// in a @.projectParentDir/Exports/ProjectVersion
+        ///// </summary>
+        ///// <param name="projectData"></param>
+        //public void ExportProjectRepo(ProjectMetaData projectRepository)
+        //{
 
-        public void ExportProjectRepo(ProjectMetaData projectRepository)
-        {
+        //}
 
-        }
-        public void GenerateProjectDataHash(object obj)
-        {
-
-        }
-        private bool TryGenerateSupplementDirectories(string projPath, string projName)
+        private static bool TryGenerateSupplementDirectories(string projPath, string projName)
         {
             try
             {

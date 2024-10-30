@@ -13,8 +13,8 @@ namespace DeployAssistant.View
         public VersionComparisonWindow(ProjectData srcData, List<ProjectSimilarity> similarities)
         {
             InitializeComponent();
-            VersionCompatibilityViewModel vcVM = new VersionCompatibilityViewModel (srcData, similarities);
-            this.DataContext = vcVM;
+            VersionCompatibilityViewModel vcVM = new(srcData, similarities);
+            DataContext = vcVM;
         }
     }
 }

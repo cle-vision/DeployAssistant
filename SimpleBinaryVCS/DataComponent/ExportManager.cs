@@ -15,10 +15,8 @@ namespace SimpleBinaryVCS.DataComponent
     {
         private string? _currentProjectPath; 
         private Dictionary<string, ProjectFile>? _backupFilesDict;
-        private FileHandlerTool _fileHandlerTool;
         public ExportManager() 
         {
-            _fileHandlerTool = App.FileHandlerTool;
         }
         #region Manager Events
         /// <summary>
@@ -36,7 +34,7 @@ namespace SimpleBinaryVCS.DataComponent
             while (!exportResult)
             {
                 if (!Directory.Exists(exportDstPath)) Directory.CreateDirectory(exportDstPath);
-                exportResult = _fileHandlerTool.TrySerializeProjectData(projectData, exportVersionLogPath);
+                exportResult = FileHandlerTool.TrySerializeProjectData(projectData, exportVersionLogPath);
                 if (!exportResult)
                 {
                     var response = WPF.MessageBox.Show("Export Failed, Would you like to try again?", "Export Project Version Log", WPF.MessageBoxButton.YesNo);
@@ -109,7 +107,7 @@ namespace SimpleBinaryVCS.DataComponent
                     if (file.DataType == ProjectDataType.Directory)
                     {
 
-                        bool handleResult = _fileHandlerTool.HandleDirectory(null, Path.Combine(exportDstPath, file.DataRelPath), DataState.None);
+                        bool handleResult = FileHandlerTool.HandleDirectory(null, Path.Combine(exportDstPath, file.DataRelPath), DataState.None);
                         if (!handleResult)
                         {
                             WPF.MessageBox.Show($"Export Failed! for file {file.DataName}!");
@@ -125,7 +123,7 @@ namespace SimpleBinaryVCS.DataComponent
                     }
                     else
                     {
-                        bool handleResult = _fileHandlerTool.HandleFile(backupFile.DataAbsPath, Path.Combine(exportDstPath, file.DataRelPath), DataState.None);
+                        bool handleResult = FileHandlerTool.HandleFile(backupFile.DataAbsPath, Path.Combine(exportDstPath, file.DataRelPath), DataState.None);
                         if (!handleResult)
                         {
                             WPF.MessageBox.Show($"Export Failed! for file {file.DataName}!");
@@ -139,7 +137,7 @@ namespace SimpleBinaryVCS.DataComponent
                     exportPath = null; 
                     return false;
                 }
-                _fileHandlerTool.TrySerializeProjectData(projectData, exportProjDataPath); 
+                FileHandlerTool.TrySerializeProjectData(projectData, exportProjDataPath); 
                 ZipFile.CreateFromDirectory(exportDstPath, exportZipPath);
                 exportPath = Directory.GetParent(exportDstPath)?.ToString();
                 return true; 
@@ -184,17 +182,17 @@ namespace SimpleBinaryVCS.DataComponent
                 worksheetPart.Worksheet = new Worksheet(new SheetData());
 
                 // Add Sheets to the Workbook
-                Sheets sheets = spreadsheetDocument.WorkbookPart.Workbook.AppendChild(new Sheets());
+                Sheets sheets = spreadsheetDocument.WorkbookPart!.Workbook.AppendChild(new Sheets());
 
                 // Append a new worksheet and associate it with the workbook
-                Sheet sheet = new Sheet() { Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Project Files" };
+                Sheet sheet = new () { Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Project Files" };
                 sheets.Append(sheet);
 
                 // Get the SheetData
-                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+                SheetData? sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
                 // Add headers
-                Row headerRow = new Row();
+                Row headerRow = new ();
                 headerRow.Append(new Cell(new InlineString(new Text("DataName"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataType"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataSize (kb)"))));
@@ -205,12 +203,12 @@ namespace SimpleBinaryVCS.DataComponent
                 headerRow.Append(new Cell(new InlineString(new Text("DataSrcPath"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataRelPath"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataHash"))));
-                sheetData.AppendChild(headerRow);
+                sheetData!.AppendChild(headerRow);
 
                 // Populate data
                 foreach (var item in sortedProjectFiles)
                 {
-                    Row newRow = new Row();
+                    Row newRow = new ();
                     newRow.Append(new Cell(new InlineString(new Text(item.DataName))));
                     newRow.Append(new Cell(new InlineString(new Text(item.DataType.ToString())))); 
                     newRow.Append(new Cell(new InlineString(new Text(item.DataSize.ToString()))));
@@ -253,17 +251,17 @@ namespace SimpleBinaryVCS.DataComponent
                 worksheetPart.Worksheet = new Worksheet(new SheetData());
 
                 // Add Sheets to the Workbook
-                Sheets sheets = spreadsheetDocument.WorkbookPart.Workbook.AppendChild(new Sheets());
+                Sheets sheets = spreadsheetDocument.WorkbookPart!.Workbook.AppendChild(new Sheets());
 
                 // Append a new worksheet and associate it with the workbook
-                Sheet sheet = new Sheet() { Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Project Files" };
+                Sheet sheet = new() { Id = spreadsheetDocument.WorkbookPart.GetIdOfPart(worksheetPart), SheetId = 1, Name = "Project Files" };
                 sheets.Append(sheet);
 
                 // Get the SheetData
-                SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+                SheetData? sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
                 // Add headers
-                Row headerRow = new Row();
+                Row headerRow = new ();
                 headerRow.Append(new Cell(new InlineString(new Text("DataName"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataType"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataSize (kb)"))));
@@ -274,12 +272,12 @@ namespace SimpleBinaryVCS.DataComponent
                 headerRow.Append(new Cell(new InlineString(new Text("DataSrcPath"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataRelPath"))));
                 headerRow.Append(new Cell(new InlineString(new Text("DataHash"))));
-                sheetData.AppendChild(headerRow);
+                sheetData!.AppendChild(headerRow);
 
                 // Populate data
                 foreach (var item in sortedProjectFiles)
                 {
-                    Row newRow = new Row();
+                    Row newRow = new ();
                     newRow.Append(new Cell(new InlineString(new Text(item.DataName))));
                     newRow.Append(new Cell(new InlineString(new Text(item.DataType.ToString())))); // Assuming DataType is an enum
                     newRow.Append(new Cell(new InlineString(new Text(item.DataSize.ToString()))));
@@ -301,16 +299,6 @@ namespace SimpleBinaryVCS.DataComponent
             }
             exportPath = xlsxFileDirPath;
             return true;
-        }
-        public void ExportProjectChanges(ProjectData projectData, List<ChangedFile> changes)
-        {
-
-        }
-
-        private bool TryExportProjectChanges(ProjectData projectData, List<ChangedFile> changes, out string? exportPath)
-        {
-            exportPath = null;
-            return false; 
         }
         private string GetExportXLSXPath(ProjectData projData)
         {

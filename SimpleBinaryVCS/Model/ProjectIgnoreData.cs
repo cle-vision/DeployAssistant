@@ -111,11 +111,6 @@ namespace DeployAssistant.Model
             sigDiffCount = sigDiffList.Count;
         }
 
-        public void FilterFilePathList(List<string> filePath, string filePathRoot)
-        {
-
-        }
-
         public void ConfigureDefaultIgnore(string projName)
         {
             string backupDir = $"Backup_{projName}";

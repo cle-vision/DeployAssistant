@@ -9,7 +9,9 @@ namespace SimpleBinaryVCS.Utils
 {
     public class FileHandlerTool
     {
-        public bool TrySerializeProjectData(ProjectData data, string filePath)
+        private static readonly JsonSerializerOptions _jsonSerializeOption = new() { WriteIndented = true };
+
+        public static bool TrySerializeProjectData(ProjectData data, string filePath)
         {
             try
             {
@@ -25,7 +27,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool TryDeserializeProjectData(string filePath, out ProjectData? projectData)
+        public static bool TryDeserializeProjectData(string filePath, out ProjectData? projectData)
         {
             try
             {
@@ -49,7 +51,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool TrySerializeProjectMetaData(ProjectMetaData data, string filePath)
+        public static bool TrySerializeProjectMetaData(ProjectMetaData data, string filePath)
         {
             try
             {
@@ -65,7 +67,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool TryDeserializeProjectMetaData(string filePath, out ProjectMetaData? projectMetaData)
+        public static bool TryDeserializeProjectMetaData(string filePath, out ProjectMetaData? projectMetaData)
         {
             try
             {
@@ -90,22 +92,21 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool TrySerializeJsonData<T>(string filePath, in T? serializingObject)
+        public static bool TrySerializeJsonData<T>(string filePath, in T? serializingObject)
         {
             try
             {
-                var jsonOption = new JsonSerializerOptions { WriteIndented = true };
-                var jsonData = JsonSerializer.Serialize(serializingObject, jsonOption);
+                var jsonData = JsonSerializer.Serialize(serializingObject, _jsonSerializeOption);
                 File.WriteAllText(filePath, jsonData);
                 return true; 
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
         }
 
-        public bool TryDeserializeJsonData<T>(string filePath, out T? serializingObject)
+        public static bool TryDeserializeJsonData<T>(string filePath, out T? serializingObject)
         {
             try
             {
@@ -122,16 +123,19 @@ namespace SimpleBinaryVCS.Utils
                     return false;
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 serializingObject = default;
                 return false;
             }
         }
 
-        public bool TryApplyFileChanges(List<ChangedFile> changes)
+        public static bool TryApplyFileChanges(List<ChangedFile> changes)
         {
-            if (changes == null) return false;
+            if (changes == null) 
+            {
+                return false;
+            }
             try
             {
                 foreach (ChangedFile file in changes)
@@ -149,7 +153,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool HandleData(IProjectData dstData, DataState state)
+        public static bool HandleData(IProjectData dstData, DataState state)
         {
             bool result;
             if (dstData.DataType == ProjectDataType.File)
@@ -163,7 +167,7 @@ namespace SimpleBinaryVCS.Utils
             return result; 
         }
 
-        public bool HandleData(IProjectData? srcData, IProjectData dstData, DataState state)
+        public static bool HandleData(IProjectData? srcData, IProjectData dstData, DataState state)
         {
             bool result;
             if (dstData.DataType == ProjectDataType.File)
@@ -177,7 +181,7 @@ namespace SimpleBinaryVCS.Utils
             return result;
         }
 
-        public bool HandleData(string? srcPath, string dstPath, ProjectDataType type, DataState state)
+        public static bool HandleData(string? srcPath, string dstPath, ProjectDataType type, DataState state)
         {
             bool result; 
             if (type == ProjectDataType.File)
@@ -191,7 +195,7 @@ namespace SimpleBinaryVCS.Utils
             return result;
         }
 
-        public void HandleData(string? srcPath, IProjectData dstData, DataState state)
+        public static void HandleData(string? srcPath, IProjectData dstData, DataState state)
         {
             if (dstData.DataType == ProjectDataType.File)
             {
@@ -203,7 +207,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool HandleDirectory(string? srcPath, string dstPath, DataState state)
+        public static bool HandleDirectory(string? srcPath, string dstPath, DataState state)
         {
             try
             {
@@ -232,7 +236,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool HandleFile(string? srcPath, string dstPath, DataState state)
+        public static bool HandleFile(string? srcPath, string dstPath, DataState state)
         {
             try
             {
@@ -240,15 +244,18 @@ namespace SimpleBinaryVCS.Utils
                 {
                     if (File.Exists(dstPath))
                     {
-                        FileInfo fileInfo = new FileInfo(dstPath);
-                        if (fileInfo.IsReadOnly) fileInfo.IsReadOnly = false; 
+                        FileInfo fileInfo = new (dstPath);
+                        if (fileInfo.IsReadOnly) 
+                        {
+                            fileInfo.IsReadOnly = false;
+                        }
                         File.Delete(dstPath);
                     }
-                        return true;
+                    return true;
                 }
                 if (srcPath == null)
                 {
-                    MessageBox.Show($"Source File is null while File Handle state is {state.ToString()}");
+                    MessageBox.Show($"Source File is null while File Handle state is {state}");
                     return false;
                 }
                 if ((state & DataState.Added) != 0)
@@ -257,7 +264,7 @@ namespace SimpleBinaryVCS.Utils
                         Directory.CreateDirectory(Path.GetDirectoryName(dstPath));
                     if (File.Exists(dstPath))
                     {
-                        FileInfo fileInfo = new FileInfo(dstPath);
+                        FileInfo fileInfo = new (dstPath);
                         if (fileInfo.IsReadOnly) fileInfo.IsReadOnly = false;
                     }
                     if (File.Exists(srcPath))
@@ -276,8 +283,11 @@ namespace SimpleBinaryVCS.Utils
                     }
                     if (File.Exists(dstPath))
                     {
-                        FileInfo fileInfo = new FileInfo(dstPath);
-                        if (fileInfo.IsReadOnly) fileInfo.IsReadOnly = false;
+                        FileInfo fileInfo = new (dstPath);
+                        if (fileInfo.IsReadOnly) 
+                        {
+                            fileInfo.IsReadOnly = false;
+                        }
                     }
                     if (File.Exists(srcPath))
                     {
@@ -299,7 +309,7 @@ namespace SimpleBinaryVCS.Utils
             }
         }
 
-        public bool MoveFile(string? srcPath, string dstPath)
+        public static bool MoveFile(string? srcPath, string dstPath)
         {
             try
             {
@@ -314,6 +324,50 @@ namespace SimpleBinaryVCS.Utils
                 MessageBox.Show($"Couldn't Move File {ex.Message}");
                 return false; 
             }
+        }
+
+        public List<string> GetDirectories(string rootPath, Dictionary<string, string> ignoreDirs)
+        {
+            List<string> resultDirs = [];
+            Stack<string> dirsToProcess = [];
+            dirsToProcess.Push(rootPath);
+
+            while (dirsToProcess.Count > 0)
+            {
+                string currentDir = dirsToProcess.Pop();
+                string relativePath = Path.GetRelativePath(rootPath, currentDir);
+            
+                // Skip ignored directories
+                if (ignoreDirs.ContainsKey(relativePath))
+                {
+                    continue;
+                }
+            
+                resultDirs.Add(currentDir);
+            
+                try
+                {
+                    foreach (var dir in Directory.GetDirectories(currentDir))
+                    {
+                        string dirRelativePath = Path.GetRelativePath(rootPath, dir);
+            
+                        if (!ignoreDirs.ContainsKey(dirRelativePath))
+                        {
+                            dirsToProcess.Push(dir);
+                        }
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Console.WriteLine($"Access denied to {currentDir}: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error processing {currentDir}: {ex.Message}");
+                }
+            }
+            
+            return resultDirs;
         }
     }
 }

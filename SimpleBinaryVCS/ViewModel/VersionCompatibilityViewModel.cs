@@ -64,8 +64,8 @@ namespace DeployAssistant.ViewModel
                     return;
                 }
                 _selected = value;
-                FileDifferences = value.fileDifferences;
-                TargetProjVersion = value.projData.UpdatedVersion; 
+                FileDifferences = value.FileDifferences;
+                TargetProjVersion = value.ProjData.UpdatedVersion; 
                 OnPropertyChanged(nameof(Selected));
             }
         }

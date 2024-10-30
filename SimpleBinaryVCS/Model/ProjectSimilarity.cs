@@ -9,20 +9,18 @@ namespace DeployAssistant.Model
 {
     public class ProjectSimilarity
     {
-        public ProjectData projData { get; set; }
-        public int numDiffWithoutResources { get; set; }
-        public int numDiffWithResources { get; set; }
-        public List<ChangedFile> fileDifferences { get; set; }
+        public ProjectData ProjData { get; set; }
+        public int NumDiffWithoutResources { get; set; }
+        public int NumDiffWithResources { get; set; }
+        public List<ChangedFile> FileDifferences { get; set; }
         public ProjectSimilarity(ProjectData projData, int numDiffWithoutResources, int numDiffWithResources, List<ChangedFile> fileDifferences)
         {
-            this.projData = projData;
-            this.numDiffWithoutResources = numDiffWithoutResources;
-            this.numDiffWithResources = numDiffWithResources;
-            this.fileDifferences = fileDifferences;
+            ProjData = projData;
+            NumDiffWithoutResources = numDiffWithoutResources;
+            NumDiffWithResources = numDiffWithResources;
+            FileDifferences = fileDifferences;
         }
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public ProjectSimilarity() { }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

@@ -8,23 +8,23 @@ namespace SimpleBinaryVCS.ViewModel
 {
     public class VersionCheckViewModel : ViewModelBase
     {
-        private string? changeLog; 
+        private string? _changeLog; 
         public string ChangeLog
         {
-            get { return changeLog ??= ""; }
+            get { return _changeLog ??= ""; }
             set
             {
-                changeLog = value;
+                _changeLog = value;
                 OnPropertyChanged("ChangeLog");
             }
         }
-        private string? updateLog;
+        private string? _updateLog;
         public string UpdateLog
         {
-            get { return updateLog ??= ""; }
+            get { return _updateLog ??= ""; }
             set
             {
-                updateLog = value;
+                _updateLog = value;
                 OnPropertyChanged("UpdateLog");
             }
         }
@@ -61,7 +61,7 @@ namespace SimpleBinaryVCS.ViewModel
         private ObservableCollection<ProjectFile>? fileList;
         public ObservableCollection<ProjectFile> FileList
         {
-            get=> fileList ??= new ObservableCollection<ProjectFile>();
+            get=> fileList ??= [];
             set
             {
                 fileList = value;
@@ -71,7 +71,7 @@ namespace SimpleBinaryVCS.ViewModel
         private Dictionary<string, object>? _projectDataReview;
         public Dictionary<string, object> ProjectDataReview
         {
-            get => _projectDataReview ??= new Dictionary<string, object>(); 
+            get => _projectDataReview ??= []; 
             set
             {
                 _projectDataReview = value;
@@ -79,14 +79,14 @@ namespace SimpleBinaryVCS.ViewModel
             }
         }
 
-        private MetaDataManager _metaDataManager;
+        private readonly MetaDataManager _metaDataManager;
         private readonly ProjectData _projectData; 
         public VersionCheckViewModel(ProjectData projectData, string versionLog, ObservableCollection<ProjectFile> fileList)
         {
             _metaDataManager = App.MetaDataManager;
             _projectData = projectData;
-            this.updateLog = "Integrity Checking";
-            this.changeLog = versionLog;
+            _updateLog = "Integrity Checking";
+            _changeLog = versionLog;
             this.fileList = fileList;
         }
 
@@ -95,11 +95,11 @@ namespace SimpleBinaryVCS.ViewModel
             _metaDataManager = App.MetaDataManager;
 
             _projectData = projectData;
-            _projectDataReview = new Dictionary<string, object>();
+            _projectDataReview = [];
             _projectData.RegisterProjectInfo(ProjectDataReview);
-            this.FileList = _projectData.ProjectFilesObs;
-            this.ChangeLog = _projectData.ChangeLog ?? "Undefined";
-            this.UpdateLog = _projectData.UpdateLog ?? "Undefined";
+            FileList = _projectData.ProjectFilesObs;
+            ChangeLog = _projectData.ChangeLog ?? "Undefined";
+            UpdateLog = _projectData.UpdateLog ?? "Undefined";
         }
     }
 }

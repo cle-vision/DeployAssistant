@@ -172,12 +172,16 @@ namespace DeployAssistant.DataComponent
                 }
 
                 ConcurrentDictionary<string, ProjectFile> projectFilesConcurrent = new ConcurrentDictionary<string, ProjectFile> ();
+                ConcurrentBag<string> hashFailureLog = new ConcurrentBag<string>();
                 var maxConcurrency = new ParallelOptions { MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 1.0)) };
                 Parallel.ForEach(intersectFiles, maxConcurrency, fileRelPath =>
                 {
                     //TODO : Resolve Hard coded issue -> Setting Manager Ignore
                     if (projectFilesDict[fileRelPath].DataType == ProjectDataType.Directory) return;
                     ProjectFile intersectedFile = new ProjectFile(projectFilesDict[fileRelPath]);
+                    // Clear stored hash so a silent GetFileMD5CheckSum failure (it swallows exceptions
+                    // internally) leaves DataHash empty and is detectable below.
+                    intersectedFile.DataHash = "";
                     if (!projectFilesConcurrent.TryAdd(fileRelPath, intersectedFile))
                     {
                         ManagerStateEventHandler?.Invoke(MetaDataState.Idle);
@@ -187,15 +191,25 @@ namespace DeployAssistant.DataComponent
                     try
                     {
                         _hashTool.GetFileMD5CheckSum(intersectedFile);
-
                     }
                     catch (Exception ex)
                     {
                         ManagerStateEventHandler?.Invoke(MetaDataState.Idle);
                         MessageBox.Show($"Couldn't Run File Integrity Check: File async Hashing Failed\n{ex.Message}");
+                        projectFilesConcurrent.TryRemove(fileRelPath, out _);
                         return;
                     }
+                    // Empty hash after the call means silent internal failure; remove the file
+                    // to prevent a false match against the stored hash.
+                    if (string.IsNullOrEmpty(intersectedFile.DataHash))
+                    {
+                        hashFailureLog.Add($"Warning: Failed to compute hash for {fileRelPath}, file excluded from integrity check");
+                        projectFilesConcurrent.TryRemove(fileRelPath, out _);
+                    }
                 });
+
+                foreach (string warning in hashFailureLog)
+                    fileIntegrityLog.AppendLine(warning);
 
                 List<Task> asyncTask = []; 
                 foreach (ProjectFile intersectedFile in projectFilesConcurrent.Values)
@@ -217,8 +231,16 @@ namespace DeployAssistant.DataComponent
 
                                 ProjectFile srcFile = new ProjectFile(projectFile, DataState.None);
                                 ProjectFile dstFile = new ProjectFile(projectFile, DataState.Modified | DataState.IntegrityChecked);
-                                dstFile.BuildVersion = FileVersionInfo.GetVersionInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).FileVersion ?? "";
-                                dstFile.DataSize = new FileInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).Length;
+                                try
+                                {
+                                    dstFile.BuildVersion = FileVersionInfo.GetVersionInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).FileVersion ?? "";
+                                    dstFile.DataSize = new FileInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).Length;
+                                }
+                                catch (Exception ex)
+                                {
+                                    // Version/size read failed; retain values copied from projectFile and log the warning.
+                                    fileIntegrityLog.AppendLine($"Warning: Could not read version/size for modified file {projectFile.DataRelPath}: {ex.Message}");
+                                }
                                 dstFile.DataHash = intersectedFile.DataHash;
                                 dstFile.UpdatedTime = new FileInfo(srcFile.DataAbsPath).LastAccessTime;
 

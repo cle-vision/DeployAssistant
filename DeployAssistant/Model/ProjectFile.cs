@@ -157,9 +157,16 @@ namespace DeployAssistant.Model
             string fileFullPath = Path.Combine(fileSrcPath, fileRelPath);
             if (dataType == ProjectDataType.File)
             {
-                var fileInfo = FileVersionInfo.GetVersionInfo(fileFullPath);
+                try
+                {
+                    this.BuildVersion = FileVersionInfo.GetVersionInfo(fileFullPath).FileVersion ?? "";
+                }
+                catch (Exception)
+                {
+                    // Non-PE files (e.g. config, data) may not expose version info; default to empty.
+                    this.BuildVersion = "";
+                }
                 this.DataSize = new FileInfo(fileFullPath).Length;
-                this.BuildVersion = fileInfo.FileVersion ?? "";
             }
             else
             {

@@ -1,6 +1,6 @@
-using SimpleBinaryVCS.DataComponent;
-using SimpleBinaryVCS.Interfaces;
-using SimpleBinaryVCS.Model;
+using DeployAssistant.DataComponent;
+using DeployAssistant.Interfaces;
+using DeployAssistant.Model;
 using System;
 using Xunit;
 

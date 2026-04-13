@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleBinaryVCS\DeployAssistant.csproj" />
+    <ProjectReference Include="..\DeployAssistant\DeployAssistant.csproj" />
   </ItemGroup>
 
 </Project>

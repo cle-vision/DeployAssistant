@@ -1,7 +1,7 @@
-using SimpleBinaryVCS.DataComponent;
-using SimpleBinaryVCS.Interfaces;
-using SimpleBinaryVCS.Model;
-using SimpleBinaryVCS.Utils;
+using DeployAssistant.DataComponent;
+using DeployAssistant.Interfaces;
+using DeployAssistant.Model;
+using DeployAssistant.Utils;
 using System;
 using System.IO;
 using System.Text;

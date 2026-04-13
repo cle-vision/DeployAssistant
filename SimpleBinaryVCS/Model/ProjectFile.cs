@@ -161,8 +161,9 @@ namespace SimpleBinaryVCS.Model
                 {
                     this.BuildVersion = FileVersionInfo.GetVersionInfo(fileFullPath).FileVersion ?? "";
                 }
-                catch
+                catch (Exception)
                 {
+                    // Non-PE files (e.g. config, data) may not expose version info; default to empty.
                     this.BuildVersion = "";
                 }
                 this.DataSize = new FileInfo(fileFullPath).Length;

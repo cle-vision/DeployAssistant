@@ -179,8 +179,8 @@ namespace SimpleBinaryVCS.DataComponent
                     //TODO : Resolve Hard coded issue -> Setting Manager Ignore
                     if (projectFilesDict[fileRelPath].DataType == ProjectDataType.Directory) return;
                     ProjectFile intersectedFile = new ProjectFile(projectFilesDict[fileRelPath]);
-                    // Clear the stored hash so we can detect when GetFileMD5CheckSum silently fails
-                    // (it catches exceptions internally and leaves DataHash unchanged on failure).
+                    // Clear stored hash so a silent GetFileMD5CheckSum failure (it swallows exceptions
+                    // internally) leaves DataHash empty and is detectable below.
                     intersectedFile.DataHash = "";
                     if (!projectFilesConcurrent.TryAdd(fileRelPath, intersectedFile))
                     {
@@ -199,9 +199,8 @@ namespace SimpleBinaryVCS.DataComponent
                         projectFilesConcurrent.TryRemove(fileRelPath, out _);
                         return;
                     }
-                    // If the hash is still empty after the call, the internal hash computation
-                    // failed silently. Remove this file so it is not incorrectly compared
-                    // against its own stored hash and falsely reported as unchanged.
+                    // Empty hash after the call means silent internal failure; remove the file
+                    // to prevent a false match against the stored hash.
                     if (string.IsNullOrEmpty(intersectedFile.DataHash))
                     {
                         hashFailureLog.Add($"Warning: Failed to compute hash for {fileRelPath}, file excluded from integrity check");
@@ -237,9 +236,10 @@ namespace SimpleBinaryVCS.DataComponent
                                     dstFile.BuildVersion = FileVersionInfo.GetVersionInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).FileVersion ?? "";
                                     dstFile.DataSize = new FileInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).Length;
                                 }
-                                catch
+                                catch (Exception ex)
                                 {
-                                    // BuildVersion and DataSize retain values copied from projectFile
+                                    // Version/size read failed; retain values copied from projectFile and log the warning.
+                                    fileIntegrityLog.AppendLine($"Warning: Could not read version/size for modified file {projectFile.DataRelPath}: {ex.Message}");
                                 }
                                 dstFile.DataHash = intersectedFile.DataHash;
                                 dstFile.UpdatedTime = new FileInfo(srcFile.DataAbsPath).LastAccessTime;

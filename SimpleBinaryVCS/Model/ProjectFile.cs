@@ -157,9 +157,15 @@ namespace SimpleBinaryVCS.Model
             string fileFullPath = Path.Combine(fileSrcPath, fileRelPath);
             if (dataType == ProjectDataType.File)
             {
-                var fileInfo = FileVersionInfo.GetVersionInfo(fileFullPath);
+                try
+                {
+                    this.BuildVersion = FileVersionInfo.GetVersionInfo(fileFullPath).FileVersion ?? "";
+                }
+                catch
+                {
+                    this.BuildVersion = "";
+                }
                 this.DataSize = new FileInfo(fileFullPath).Length;
-                this.BuildVersion = fileInfo.FileVersion ?? "";
             }
             else
             {

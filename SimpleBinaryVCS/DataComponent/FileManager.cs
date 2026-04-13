@@ -172,12 +172,16 @@ namespace SimpleBinaryVCS.DataComponent
                 }
 
                 ConcurrentDictionary<string, ProjectFile> projectFilesConcurrent = new ConcurrentDictionary<string, ProjectFile> ();
+                ConcurrentBag<string> hashFailureLog = new ConcurrentBag<string>();
                 var maxConcurrency = new ParallelOptions { MaxDegreeOfParallelism = Convert.ToInt32(Math.Ceiling((Environment.ProcessorCount * 0.75) * 1.0)) };
                 Parallel.ForEach(intersectFiles, maxConcurrency, fileRelPath =>
                 {
                     //TODO : Resolve Hard coded issue -> Setting Manager Ignore
                     if (projectFilesDict[fileRelPath].DataType == ProjectDataType.Directory) return;
                     ProjectFile intersectedFile = new ProjectFile(projectFilesDict[fileRelPath]);
+                    // Clear the stored hash so we can detect when GetFileMD5CheckSum silently fails
+                    // (it catches exceptions internally and leaves DataHash unchanged on failure).
+                    intersectedFile.DataHash = "";
                     if (!projectFilesConcurrent.TryAdd(fileRelPath, intersectedFile))
                     {
                         ManagerStateEventHandler?.Invoke(MetaDataState.Idle);
@@ -187,15 +191,26 @@ namespace SimpleBinaryVCS.DataComponent
                     try
                     {
                         _hashTool.GetFileMD5CheckSum(intersectedFile);
-
                     }
                     catch (Exception ex)
                     {
                         ManagerStateEventHandler?.Invoke(MetaDataState.Idle);
                         MessageBox.Show($"Couldn't Run File Integrity Check: File async Hashing Failed\n{ex.Message}");
+                        projectFilesConcurrent.TryRemove(fileRelPath, out _);
                         return;
                     }
+                    // If the hash is still empty after the call, the internal hash computation
+                    // failed silently. Remove this file so it is not incorrectly compared
+                    // against its own stored hash and falsely reported as unchanged.
+                    if (string.IsNullOrEmpty(intersectedFile.DataHash))
+                    {
+                        hashFailureLog.Add($"Warning: Failed to compute hash for {fileRelPath}, file excluded from integrity check");
+                        projectFilesConcurrent.TryRemove(fileRelPath, out _);
+                    }
                 });
+
+                foreach (string warning in hashFailureLog)
+                    fileIntegrityLog.AppendLine(warning);
 
                 List<Task> asyncTask = []; 
                 foreach (ProjectFile intersectedFile in projectFilesConcurrent.Values)
@@ -217,8 +232,15 @@ namespace SimpleBinaryVCS.DataComponent
 
                                 ProjectFile srcFile = new ProjectFile(projectFile, DataState.None);
                                 ProjectFile dstFile = new ProjectFile(projectFile, DataState.Modified | DataState.IntegrityChecked);
-                                dstFile.BuildVersion = FileVersionInfo.GetVersionInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).FileVersion ?? "";
-                                dstFile.DataSize = new FileInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).Length;
+                                try
+                                {
+                                    dstFile.BuildVersion = FileVersionInfo.GetVersionInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).FileVersion ?? "";
+                                    dstFile.DataSize = new FileInfo(Path.Combine(_dstProjectData.ProjectPath, projectFile.DataRelPath)).Length;
+                                }
+                                catch
+                                {
+                                    // BuildVersion and DataSize retain values copied from projectFile
+                                }
                                 dstFile.DataHash = intersectedFile.DataHash;
                                 dstFile.UpdatedTime = new FileInfo(srcFile.DataAbsPath).LastAccessTime;
 

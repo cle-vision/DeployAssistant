@@ -58,7 +58,8 @@ namespace DeployAssistant.Model
                     if (PartOfIgnore(file.SrcFile)) excludingList.Add(file);
                 }
             }
-            changedFileList = changedFileList.Except(excludingList).ToList();
+            foreach (ChangedFile excluded in excludingList)
+                changedFileList.Remove(excluded);
         }
 
         public void FilterFilePathList(List<string> filePath, string filePathRoot)

@@ -79,9 +79,26 @@ namespace DeployAssistant.Tests.Models
 
             ignore.FilterChangedFileList(changes);
 
-            // Note: FilterChangedFileList has a bug where it reassigns the local variable
-            // instead of modifying the list in-place. Both items remain in the original list.
-            // This test documents the current (buggy) behavior.
+            // Only the non-ignored file should remain
+            Assert.Single(changes);
+            Assert.Equal("app.dll", changes[0].DstFile!.DataName);
+        }
+
+        [Fact]
+        public void FilterChangedFileList_NoIgnoredFiles_LeavesListUnchanged()
+        {
+            var ignore = new ProjectIgnoreData("Proj");
+            var file1 = MakeFile(@"logic.dll", "logic.dll");
+            var file2 = MakeFile(@"core.dll", "core.dll");
+
+            var changes = new List<ChangedFile>
+            {
+                new ChangedFile(file1, DataState.Added),
+                new ChangedFile(file2, DataState.Modified)
+            };
+
+            ignore.FilterChangedFileList(changes);
+
             Assert.Equal(2, changes.Count);
         }
 

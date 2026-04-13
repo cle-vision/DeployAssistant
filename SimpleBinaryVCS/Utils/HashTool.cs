@@ -40,7 +40,7 @@ namespace SimpleBinaryVCS.Utils
                 dstHashBytes = md5.ComputeHash(dstStream);
             }
             string srcHashString = BitConverter.ToString(srcHashBytes).Replace("-", "");
-            string dstHashString = BitConverter.ToString(srcHashBytes).Replace("-", "");
+            string dstHashString = BitConverter.ToString(dstHashBytes).Replace("-", "");
             result = (srcHashString, dstHashString);
             return srcHashString == dstHashString;
         }
